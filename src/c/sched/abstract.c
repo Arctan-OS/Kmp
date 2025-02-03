@@ -28,8 +28,20 @@
 #include <global.h>
 #include <arch/smp.h>
 
+/*
+ * There are three states:
+ *  * Last    - Last process ran, has its context stored in a processor
+ *              descriptors registers.
+ *  * Running - The current processor running, register state is unknown
+ *              until timer interrupt asking for a switch.
+ *  * Next    - The next process to be run, register state is known at to
+ *              be loaded at next timer interrupt.
+ * */
+
+struct ARC_Process *temp = NULL;
+
 uint64_t get_current_tid() {
-	return ((uint64_t)get_processor_id() << 56) | 1;
+	return ((uint64_t)smp_get_processor_id() << 56) | 1;
 }
 
 int yield_cpu(uint64_t tid) {
@@ -38,6 +50,27 @@ int yield_cpu(uint64_t tid) {
 	}
 
 //	ARC_DEBUG(INFO, "Yielding CPU\n");
+
+	return 0;
+}
+
+int sched_queue(struct ARC_Process *proc, int priority) {
+	temp = proc;
+	return 0;
+}
+
+int sched_tick() {
+	return 0;
+}
+
+struct ARC_Process *sched_get_current_proc() {
+	return temp;
+}
+
+int init_scheduler(int type) {
+	(void)type;
+
+	ARC_DEBUG(WARN, "Totally initializing scheduler\n");
 
 	return 0;
 }
