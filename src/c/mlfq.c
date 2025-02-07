@@ -1,5 +1,5 @@
 /**
- * @file mlfq.h
+ * @file mlfq.c
  *
  * @author awewsomegamer <awewsomegamer@gmail.com>
  *
@@ -24,7 +24,36 @@
  *
  * @DESCRIPTION
 */
-#ifndef ARC_MP_SCHED_MLFQ_H
-#define ARC_MP_SCHED_MLFQ_H
+#ifdef ARC_TARGET_SCHED_MLFQ
+
+#include <mp/mflq.h>
+#include <mp/scheduler.h>
+
+struct ARC_Process *Arc_SchedCurrentPorcess = NULL;
+
+int sched_queue(struct ARC_Process *proc, int priority) {
+	(void)priority;
+	Arc_SchedCurrentPorcess = proc;
+	return 0;
+}
+
+int sched_dequeue(struct ARC_Process *proc) {
+	(void)proc;
+	return 0;
+}
+
+int sched_tick() {
+	return 0;
+}
+
+int sched_yield_cpu(uint64_t tid) {
+	(void)tid;
+
+	return 0;
+}
+
+int init_scheduler() {
+	return 0;
+}
 
 #endif

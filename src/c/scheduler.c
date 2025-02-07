@@ -1,5 +1,5 @@
 /**
- * @file abstract.c
+ * @file scheduler.c
  *
  * @author awewsomegamer <awewsomegamer@gmail.com>
  *
@@ -24,7 +24,7 @@
  *
  * @DESCRIPTION
 */
-#include <mp/sched/abstract.h>
+#include <mp/scheduler.h>
 #include <global.h>
 #include <arch/smp.h>
 
@@ -38,39 +38,10 @@
  *              be loaded at next timer interrupt.
  * */
 
-struct ARC_Process *temp = NULL;
-
-uint64_t get_current_tid() {
+uint64_t sched_get_current_tid() {
 	return ((uint64_t)smp_get_processor_id() << 56) | 1;
 }
 
-int yield_cpu(uint64_t tid) {
-	if (get_current_tid() == tid) {
-		return 0;
-	}
-
-//	ARC_DEBUG(INFO, "Yielding CPU\n");
-
-	return 0;
-}
-
-int sched_queue(struct ARC_Process *proc, int priority) {
-	temp = proc;
-	return 0;
-}
-
-int sched_tick() {
-	return 0;
-}
-
 struct ARC_Process *sched_get_current_proc() {
-	return temp;
-}
-
-int init_scheduler(int type) {
-	(void)type;
-
-	ARC_DEBUG(WARN, "Totally initializing scheduler\n");
-
-	return 0;
+	return Arc_SchedCurrentPorcess;
 }

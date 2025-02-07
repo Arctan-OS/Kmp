@@ -1,5 +1,5 @@
 /**
- * @file abstract.h
+ * @file mlfq.h
  *
  * @author awewsomegamer <awewsomegamer@gmail.com>
  *
@@ -24,30 +24,11 @@
  *
  * @DESCRIPTION
 */
-#ifndef ARC_MP_SCHED_ABSTRACT_H
-#define ARC_MP_SCHED_ABSTRACT_H
+#ifdef ARC_TARGET_SCHED_MLFQ
+#ifndef ARC_MP_SCHED_MLFQ_H
+#define ARC_MP_SCHED_MLFQ_H
 
-#include <stdint.h>
-#include <arch/process.h>
+extern struct ARC_Process *Arc_SchedCurrentPorcess;
 
-#define ARC_SCHED_TYPE_RR 0
-
-#define ARC_SCHED_PRI_HI 0
-#define ARC_SCHED_PRI_LO 8
-
-/**
- * Get the currently running thread ID.
- * */
-uint64_t get_current_tid();
-
-/**
- * Yield CPU to desired thread.
- * */
-int yield_cpu(uint64_t tid);
-
-int sched_queue(struct ARC_Process *proc, int priority);
-int sched_tick();
-struct ARC_Process *sched_get_current_proc();
-int init_scheduler(int type);
-
+#endif
 #endif

@@ -1,5 +1,5 @@
 /**
- * @file mlfq.c
+ * @file scheduler.h
  *
  * @author awewsomegamer <awewsomegamer@gmail.com>
  *
@@ -24,3 +24,40 @@
  *
  * @DESCRIPTION
 */
+#ifndef ARC_MP_SCHED_ABSTRACT_H
+#define ARC_MP_SCHED_ABSTRACT_H
+
+#include <stdint.h>
+#include <arch/process.h>
+
+#ifdef ARC_TARGET_SCHED_MLFQ
+#include <mp/mflq.h>
+#elif ARC_TARGET_SCHED_RR
+// #include <rr.h>
+#endif
+
+#define ARC_SCHED_PRI_HI 0
+#define ARC_SCHED_PRI_LO 8
+
+// NOTE: Scheduler implementations should define this variable
+// extern struct ARC_Process *Arc_SchedCurrentPorcess;
+
+int sched_queue(struct ARC_Process *proc, int priority);
+int sched_dequeue(struct ARC_Process *proc);
+int sched_tick();
+
+/**
+ * Get the currently running thread ID.
+ * */
+uint64_t sched_get_current_tid();
+
+struct ARC_Process *sched_get_current_proc();
+
+/**
+ * Yield CPU to desired thread.
+ * */
+int sched_yield_cpu(uint64_t tid);
+
+int init_scheduler();
+
+#endif
