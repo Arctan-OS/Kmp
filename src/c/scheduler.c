@@ -41,7 +41,3 @@
 uint64_t sched_get_current_tid() {
 	return ((uint64_t)smp_get_processor_id() << 56) | 1;
 }
-
-struct ARC_Process *sched_get_current_proc() {
-	return Arc_SchedCurrentPorcess;
-}

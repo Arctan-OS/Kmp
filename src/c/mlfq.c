@@ -26,7 +26,6 @@
 */
 #ifdef ARC_TARGET_SCHED_MLFQ
 
-#include <mp/mflq.h>
 #include <mp/scheduler.h>
 
 struct ARC_Process *Arc_SchedCurrentPorcess = NULL;
