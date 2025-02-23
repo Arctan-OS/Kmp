@@ -73,15 +73,44 @@ int sched_queue(struct ARC_Process *proc, int priority) {
 }
 
 int sched_dequeue(struct ARC_Process *proc) {
-	if (proc == NULL) {
+	if (proc == NULL){
 		return -1;
 	}
 
 	return 0;
 }
 
-struct ARC_Thread *sched_tick() {
-	return NULL;
+int sched_tick() {
+	if (current_process == NULL) {
+		return -2;
+	}
+
+	struct ARC_ProcessorDescriptor *processor = smp_get_proc_desc();
+
+	if (processor != Arc_BootProcessor) {
+		return -1;
+	}
+
+	ticks++;
+
+	int ret = 0;
+
+	struct ARC_Process *last = current_process->process;
+	spinlock_lock(&last->thread_lock);
+
+	last->nextex = last->threads;
+
+	if (ticks >= ARC_TICKS_PER_TIMESLICE) {
+		spinlock_lock(&list_lock);
+		current_process = current_process->next;
+		spinlock_unlock(&list_lock);
+		ticks = 0;
+		ret = 1;
+	}
+
+	spinlock_unlock(&last->thread_lock);
+
+	return ret;
 }
 
 int sched_yield_cpu(uint64_t tid) {

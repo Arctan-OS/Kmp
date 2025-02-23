@@ -38,7 +38,7 @@
 
 int sched_queue(struct ARC_Process *proc, int priority);
 int sched_dequeue(struct ARC_Process *proc);
-struct ARC_Thread *sched_tick();
+int sched_tick();
 
 /**
  * Get the currently running thread ID.
