@@ -95,11 +95,6 @@ int sched_tick() {
 
 	int ret = 0;
 
-	struct ARC_Process *last = current_process->process;
-	spinlock_lock(&last->thread_lock);
-
-	last->nextex = last->threads;
-
 	if (ticks >= ARC_TICKS_PER_TIMESLICE) {
 		spinlock_lock(&list_lock);
 		current_process = current_process->next;
@@ -107,8 +102,6 @@ int sched_tick() {
 		ticks = 0;
 		ret = 1;
 	}
-
-	spinlock_unlock(&last->thread_lock);
 
 	return ret;
 }
@@ -129,7 +122,7 @@ struct ARC_Thread *sched_get_current_thread() {
 	spinlock_lock(&list_lock);
 
 	processor->current_process = current_process->process;
-	struct ARC_Thread *thread = process_get_next_thread(current_process->process);
+	struct ARC_Thread *thread = process_get_thread(current_process->process);
 
 	spinlock_unlock(&list_lock);
 
