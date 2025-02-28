@@ -26,6 +26,8 @@
 */
 //#ifdef ARC_TARGET_SCHED_RR
 
+#include "arch/process.h"
+#include "config.h"
 #include <mp/scheduler.h>
 #include <mm/allocator.h>
 #include <lib/atomics.h>
@@ -33,14 +35,8 @@
 
 #include <global.h>
 
-struct process_entry {
-	struct ARC_Process *process;
-	struct process_entry *next;
-};
-
-static struct process_entry *current_process = NULL;
-
-static ARC_GenericSpinlock list_lock;
+static struct ARC_ProcessEntry *current_process = NULL;
+static struct ARC_ProcessEntry *begin_process = NULL;
 
 static uint64_t ticks = 0;
 
@@ -51,7 +47,7 @@ int sched_queue(struct ARC_Process *proc, int priority) {
 
 	(void)priority;
 
-	struct process_entry *entry = alloc(sizeof(*entry));
+	struct ARC_ProcessEntry *entry = alloc(sizeof(*entry));
 
 	if (entry == NULL) {
 		return -2;
@@ -59,29 +55,45 @@ int sched_queue(struct ARC_Process *proc, int priority) {
 
 	entry->process = proc;
 
-	spinlock_lock(&list_lock);
-	if (current_process != NULL) {
-		entry->next = current_process->next;
-		current_process->next = entry;
+	struct ARC_ProcessEntry *temp = entry;
+	struct ARC_ProcessEntry *expected = NULL;
+	struct ARC_ProcessEntry *current = current_process;
+
+	ARC_ATOMIC_LFENCE;
+
+	if (ARC_ATOMIC_CMPXCHG(&current_process, &expected, temp)) {
+		begin_process = entry;
 	} else {
-		entry->next = entry;
-		current_process = entry;
+		ARC_ATOMIC_XCHG(&current->next, &temp, &entry->next);
+		ARC_ATOMIC_XCHG(&entry->prev, &current, &temp);
 	}
-	spinlock_unlock(&list_lock);
 
 	return 0;
 }
 
-int sched_dequeue(struct ARC_Process *proc) {
+int sched_dequeue(struct ARC_ProcessEntry *proc) {
 	if (proc == NULL){
 		return -1;
+	}
+
+	void *tmp = NULL;
+
+	ARC_ATOMIC_XCHG(&proc->prev->next, &proc->next, (struct ARC_ProcessEntry **)&tmp);
+	if (proc->next != NULL) {
+		ARC_ATOMIC_XCHG(&proc->next->prev, &proc->prev, (struct ARC_ProcessEntry **)&tmp);
+	}
+
+	ARC_ATOMIC_SFENCE;
+
+	if (proc == current_process) {
+		current_process = proc->next;
 	}
 
 	return 0;
 }
 
 int sched_tick() {
-	if (current_process == NULL) {
+	if (begin_process == NULL) {
 		return -2;
 	}
 
@@ -96,10 +108,15 @@ int sched_tick() {
 	int ret = 0;
 
 	if (ticks >= ARC_TICKS_PER_TIMESLICE) {
-		spinlock_lock(&list_lock);
-		current_process = current_process->next;
-		spinlock_unlock(&list_lock);
+		ARC_ATOMIC_SFENCE;
+		if (current_process != NULL) {
+			current_process = current_process->next;
+		} else {
+			current_process = begin_process->next;
+		}
+		
 		ticks = 0;
+
 		ret = 1;
 	}
 
@@ -113,24 +130,27 @@ int sched_yield_cpu(uint64_t tid) {
 }
 
 struct ARC_Thread *sched_get_current_thread() {
-	if (current_process == NULL) {
-		return NULL;
-	}
-
 	struct ARC_ProcessorDescriptor *processor = smp_get_proc_desc();
 
-	spinlock_lock(&list_lock);
+	ARC_ATOMIC_SFENCE;
 
-	processor->current_process = current_process->process;
-	struct ARC_Thread *thread = process_get_thread(current_process->process);
+	if (current_process == NULL) {
+		goto null_case;
+	}
 
-	spinlock_unlock(&list_lock);
+	processor->current_process = current_process;
+	struct ARC_Thread *thread = process_get_thread(processor->current_process->process);
+	
+	if (thread == NULL) {
+		null_case:;
+		processor->current_process = begin_process;
+		thread = begin_process->process->threads;
+	}
 
 	return thread;
 }
 
 int init_scheduler() {
-	init_static_spinlock(&list_lock);
 	ARC_DEBUG(INFO, "Initialized round robin scheduler\n");
 
 	return 0;

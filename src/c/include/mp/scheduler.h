@@ -33,11 +33,17 @@
 #define ARC_SCHED_PRI_HI 0
 #define ARC_SCHED_PRI_LO 8
 
+struct ARC_ProcessEntry {
+	struct ARC_Process *process;
+	struct ARC_ProcessEntry *next;
+        struct ARC_ProcessEntry *prev;
+};
+
 // NOTE: Scheduler implementations should define this variable
 // extern struct ARC_Process *Arc_SchedCurrentProcess;
 
 int sched_queue(struct ARC_Process *proc, int priority);
-int sched_dequeue(struct ARC_Process *proc);
+int sched_dequeue(struct ARC_ProcessEntry *proc);
 int sched_tick();
 
 /**
