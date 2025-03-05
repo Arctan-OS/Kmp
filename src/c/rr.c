@@ -24,7 +24,7 @@
  *
  * @DESCRIPTION
 */
-//#ifdef ARC_TARGET_SCHED_RR
+#ifdef ARC_TARGET_SCHED_RR
 
 #include "arch/process.h"
 #include "config.h"
@@ -156,4 +156,4 @@ int init_scheduler() {
 	return 0;
 }
 
-//#endif
+#endif
