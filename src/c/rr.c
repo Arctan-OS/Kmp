@@ -133,12 +133,12 @@ struct ARC_Thread *sched_get_current_thread() {
 	struct ARC_ProcessorDescriptor *processor = smp_get_proc_desc();
 
 	ARC_ATOMIC_SFENCE;
+	processor->current_process = current_process;
 
-	if (current_process == NULL) {
+	if (processor->current_process == NULL) {
 		goto null_case;
 	}
 
-	processor->current_process = current_process;
 	struct ARC_Thread *thread = process_get_thread(processor->current_process->process);
 	
 	if (thread == NULL) {
