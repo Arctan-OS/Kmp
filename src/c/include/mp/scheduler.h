@@ -28,7 +28,7 @@
 #define ARC_MP_SCHED_ABSTRACT_H
 
 #include <stdint.h>
-#include <arch/process.h>
+#include <userspace/process.h>
 
 #define ARC_SCHED_PRI_HI 0
 #define ARC_SCHED_PRI_LO 8
