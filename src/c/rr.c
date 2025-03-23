@@ -26,8 +26,8 @@
 */
 #ifdef ARC_TARGET_SCHED_RR
 
-#include "arch/process.h"
-#include "config.h"
+#include <arch/process.h>
+#include <config.h>
 #include <mp/scheduler.h>
 #include <mm/allocator.h>
 #include <lib/atomics.h>
