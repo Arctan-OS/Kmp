@@ -103,17 +103,19 @@ int sched_tick() {
 	}
 
 	ticks++;
-
+	
 	int ret = 0;
-
+	
 	if (ticks >= ARC_TICKS_PER_TIMESLICE) {
 		ARC_ATOMIC_SFENCE;
 		if (current_process != NULL) {
 			current_process = current_process->next;
-		} else {
-			current_process = begin_process->next;
 		}
 		
+		if (current_process == NULL) {
+			current_process = begin_process;
+		}
+
 		ticks = 0;
 
 		ret = 1;
