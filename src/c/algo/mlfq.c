@@ -25,7 +25,7 @@
  * @DESCRIPTION
 */
 #ifdef ARC_TARGET_SCHED_MLFQ
-
+/*
 #include <mp/scheduler.h>
 
 struct ARC_Process *Arc_SchedCurrentPorcess = NULL;
@@ -54,5 +54,5 @@ int sched_yield_cpu(uint64_t tid) {
 int init_scheduler() {
 	return 0;
 }
-
+*/
 #endif

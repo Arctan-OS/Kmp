@@ -26,20 +26,19 @@
 */
 #ifdef ARC_TARGET_SCHED_RR
 
-#include <config.h>
-#include <mp/scheduler.h>
-#include <mm/allocator.h>
-#include <lib/atomics.h>
-#include <arch/smp.h>
-
-#include <global.h>
+#include "arch/smp.h"
+#include "config.h"
+#include "global.h"
+#include "lib/atomics.h"
+#include "mp/scheduler.h"
 
 static struct ARC_ProcessEntry *current_process = NULL;
 static struct ARC_ProcessEntry *begin_process = NULL;
 
 static uint64_t ticks = 0;
 
-int sched_queue(struct ARC_Process *proc, int priority) {
+int sched_queue(ARC_Thread *thread) {
+	/*
 	if (proc == NULL) {
 		return -1;
 	}
@@ -66,11 +65,12 @@ int sched_queue(struct ARC_Process *proc, int priority) {
 		ARC_ATOMIC_XCHG(&current->next, &temp, &entry->next);
 		ARC_ATOMIC_XCHG(&entry->prev, &current, &temp);
 	}
-
+*/
 	return 0;
 }
 
-int sched_dequeue(struct ARC_ProcessEntry *proc) {
+int sched_dequeue(ARC_Thread *thread) {
+	/*
 	if (proc == NULL){
 		return -1;
 	}
@@ -87,7 +87,7 @@ int sched_dequeue(struct ARC_ProcessEntry *proc) {
 	if (proc == current_process) {
 		current_process = proc->next;
 	}
-
+*/
 	return 0;
 }
 
@@ -98,9 +98,9 @@ int sched_tick() {
 
 	struct ARC_ProcessorDescriptor *processor = smp_get_proc_desc();
 
-	if (processor != Arc_BootProcessor) {
-		return -1;
-	}
+//	if (processor != Arc_BootProcessor) {
+//		return -1;
+//	}
 
 	ticks++;
 	
@@ -109,7 +109,7 @@ int sched_tick() {
 	if (ticks >= ARC_TICKS_PER_TIMESLICE) {
 		ARC_ATOMIC_SFENCE;
 		if (current_process != NULL) {
-			current_process = current_process->next;
+//			current_process = current_process->next;
 		}
 		
 		if (current_process == NULL) {
@@ -124,14 +124,17 @@ int sched_tick() {
 	return ret;
 }
 
-int sched_yield_cpu(uint64_t tid) {
-	(void)tid;
-
-	return 0;
+void sched_yield(ARC_Thread *thread) {
+	(void)thread;
 }
 
-struct ARC_Thread *sched_get_current_thread() {
+ARC_Thread *sched_current_thread() {
+	/*
 	struct ARC_ProcessorDescriptor *processor = smp_get_proc_desc();
+
+	if (processor == NULL) {
+		return NULL;
+	}
 
 	ARC_ATOMIC_SFENCE;
 	processor->current_process = current_process;
@@ -149,6 +152,8 @@ struct ARC_Thread *sched_get_current_thread() {
 	}
 
 	return thread;
+	*/
+	return NULL;
 }
 
 int init_scheduler() {
