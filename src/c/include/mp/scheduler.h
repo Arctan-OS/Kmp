@@ -24,39 +24,25 @@
  *
  * @DESCRIPTION
 */
-#ifndef ARC_MP_SCHED_ABSTRACT_H
-#define ARC_MP_SCHED_ABSTRACT_H
+#ifndef ARC_MP_SCHEDULER_H
+#define ARC_MP_SCHEDULER_H
 
-#include <stdint.h>
-#include <userspace/process.h>
+#include "userspace/thread.h"
 
-#define ARC_SCHED_PRI_HI 0
-#define ARC_SCHED_PRI_LO 8
-
-struct ARC_ProcessEntry {
-	struct ARC_Process *process;
-	struct ARC_ProcessEntry *next;
-        struct ARC_ProcessEntry *prev;
+enum {
+	ARC_THREAD_RUNNING = 0,
+	ARC_THREAD_READY,
+	ARC_THREAD_SUSPEND
 };
 
 // NOTE: Scheduler implementations should define this variable
 // extern struct ARC_Process *Arc_SchedCurrentProcess;
 
-int sched_queue(struct ARC_Process *proc, int priority);
-int sched_dequeue(struct ARC_ProcessEntry *proc);
+int sched_queue(ARC_Thread *thread);
+void sched_yield(ARC_Thread *thread);
+int sched_dequeue(ARC_Thread *thread);
 int sched_tick();
-
-/**
- * Get the currently running thread ID.
- * */
-uint64_t sched_get_current_tid();
-
-struct ARC_Thread *sched_get_current_thread();
-
-/**
- * Yield CPU to desired thread.
- * */
-int sched_yield_cpu(uint64_t tid);
+ARC_Thread *sched_current_thread();
 
 int init_scheduler();
 
