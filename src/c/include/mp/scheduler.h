@@ -27,6 +27,8 @@
 #ifndef ARC_MP_SCHEDULER_H
 #define ARC_MP_SCHEDULER_H
 
+#include "arch/interrupt.h"
+#include "userspace/process.h"
 #include "userspace/thread.h"
 
 enum {
@@ -43,6 +45,10 @@ void sched_yield(ARC_Thread *thread);
 int sched_dequeue(ARC_Thread *thread);
 int sched_tick();
 ARC_Thread *sched_current_thread();
+void ARC_NAME_IRQ(sched_timer_hook)();
+
+int sched_queue_proc(ARC_Process *proc);
+int sched_dequeue_proc(ARC_Process *proc);
 
 int init_scheduler();
 
