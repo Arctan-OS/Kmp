@@ -171,6 +171,7 @@ void sched_timer_hook(ARC_InterruptFrame *frame) {
 
 	if (sched_tick() == 0) {
 		cur = desc->thread;
+
 		// Swap in new context if needed
 		memcpy(frame, &cur->context->frame, sizeof(*frame));
 	}
