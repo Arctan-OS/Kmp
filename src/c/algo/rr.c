@@ -108,7 +108,7 @@ static ARC_Thread *sched_get_next_thread() {
 	return halt;
 }
 
-int sched_tick() {
+int USERSPACE sched_tick() {
 	ARC_ProcessorDescriptor *desc = smp_get_proc_desc();
 	internal_perproc_state *state = desc->scheduler_meta;
 
@@ -134,6 +134,7 @@ int sched_tick() {
 		}
 
 		desc->thread = new;
+		desc->process = new->parent;
 
 		state->ticks = 0;
 		r = 0;
