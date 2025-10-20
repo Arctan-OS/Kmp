@@ -24,10 +24,9 @@
  *
  * @DESCRIPTION
 */
-#include "arch/x86-64/config.h"
 #ifdef ARC_TARGET_SCHED_RR
-
 #include "arch/interrupt.h"
+#include "arch/pager.h"
 #include "arch/smp.h"
 #include "config.h"
 #include "global.h"
@@ -108,7 +107,7 @@ static ARC_Thread *sched_get_next_thread() {
 	return halt;
 }
 
-int USERSPACE sched_tick() {
+int sched_tick() {
 	ARC_ProcessorDescriptor *desc = smp_get_proc_desc();
 	internal_perproc_state *state = desc->scheduler_meta;
 
@@ -135,6 +134,9 @@ int USERSPACE sched_tick() {
 
 		desc->thread = new;
 		desc->process = new->parent;
+
+//		printf("New thread: %p %p\n", desc->thread, desc->process);
+//		printf("RIP: %"PRIx64"\n", desc->thread->context->frame.rip);
 
 		state->ticks = 0;
 		r = 0;
@@ -180,7 +182,7 @@ void sched_timer_hook(ARC_InterruptFrame *frame) {
 	interrupt_end();
 }
 
-ARC_DEFINE_IRQ_HANDLER(sched_timer_hook);
+ARC_DEFINE_IRQ_HANDLER(sched_timer_hook, Arc_KernelPageTables);
 
 int init_scheduler() {
 	halt_proc = process_create(false, NULL);
