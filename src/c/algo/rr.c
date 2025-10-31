@@ -24,6 +24,7 @@
  *
  * @DESCRIPTION
 */
+#include "arch/context.h"
 #ifdef ARC_TARGET_SCHED_RR
 #include "arch/interrupt.h"
 #include "arch/pager.h"
@@ -135,7 +136,7 @@ int sched_tick() {
 		desc->thread = new;
 		desc->process = new->parent;
 
-//		printf("New thread: %p %p\n", desc->thread, desc->process);
+		printf("New thread: %p %p on desc %p\n", desc, desc->thread, desc->process);
 //		printf("RIP: %"PRIx64"\n", desc->thread->context->frame.rip);
 
 		state->ticks = 0;
@@ -166,17 +167,12 @@ void sched_timer_hook(ARC_InterruptFrame *frame) {
 	ARC_Thread *cur = desc->thread;
 
 	if (cur != NULL) {
-		// Save old context
-		memcpy(&cur->context->frame, frame, sizeof(*frame));
+		context_save(cur->context, frame);
 	}
-
-	// TODO: FXSAVE / RSTOR, TCB
 
 	if (sched_tick() == 0) {
 		cur = desc->thread;
-
-		// Swap in new context if needed
-		memcpy(frame, &cur->context->frame, sizeof(*frame));
+		context_load(cur->context, frame);
 	}
 
 	interrupt_end();
