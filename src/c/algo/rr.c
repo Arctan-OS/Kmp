@@ -136,9 +136,6 @@ int sched_tick() {
 		desc->thread = new;
 		desc->process = new->parent;
 
-		printf("New thread: %p %p on desc %p\n", desc, desc->thread, desc->process);
-//		printf("RIP: %"PRIx64"\n", desc->thread->context->frame.rip);
-
 		state->ticks = 0;
 		r = 0;
 	}
